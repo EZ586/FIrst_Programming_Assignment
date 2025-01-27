@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, Button, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, TextInput, Button, ScrollView, Keyboard, TouchableWithoutFeedback } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { db } from '../firebase.js'
 import { onValue, ref, set } from 'firebase/database'
@@ -24,6 +24,9 @@ const DataDisplay = () => {
         setTitle('')
         setBody('')
     }
+    const dismissKeyboard = () => {
+        Keyboard.dismiss();
+    };
 
     const [data, setData] = useState([])
     
@@ -43,6 +46,7 @@ const DataDisplay = () => {
     }, [])
 
     return (
+        <TouchableWithoutFeedback onPress={dismissKeyboard} style={{ flex: 1 }}>
         <View style={styles.container}>
             <Text style={styles.header}>Add Data</Text>
             <TextInput 
@@ -74,6 +78,7 @@ const DataDisplay = () => {
             </ScrollView>
             
         </View>
+        </TouchableWithoutFeedback>
     )
 }
 
