@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, TextInput, Button } from 'react-native'
+import { View, Text, StyleSheet, TextInput, Button, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { db } from '../firebase.js'
-import { ref, set } from 'firebase/database'
+import { onValue, ref, set } from 'firebase/database'
 
 const DataDisplay = () => {
     const [title, setTitle] = useState('');
@@ -15,16 +15,36 @@ const DataDisplay = () => {
         setTitle('')
         setBody('')
     }
+    
+    const removeData = () => {
+        set(ref(db, 'posts/' + title) , {
+            title: title,
+            body: body
+        })
+        setTitle('')
+        setBody('')
+    }
 
     const [data, setData] = useState([])
     
     useEffect (() => {
         const dataRef = ref(db, 'posts/');
-    })
+        onValue(dataRef, (snapshot) => {
+            const ref_data = snapshot.val();
+            const newData = Object.keys(ref_data).map(key => ({
+                id:key,
+                ...ref_data[key]
+            }))
+            console.log('----------------------------------------')
+            console.log(ref_data)
+            setData(newData)
+            console.log(data)
+        })
+    }, [])
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Received Data</Text>
+            <Text style={styles.header}>Add Data</Text>
             <TextInput 
                 placeholder='Title'
                 value={title}
@@ -41,6 +61,18 @@ const DataDisplay = () => {
                 title='Add Data'
                 onPress={addData}
             />
+            <Text style={styles.data_header}>Database Data</Text>
+            <ScrollView>
+               {data.map((item, index) => {
+                return(
+                    <View key={index} style={styles.database_data}>
+                        <Text style={styles.text}>Title: {item.title}</Text>
+                        <Text style={styles.text}>Body: {item.body}</Text>
+                    </View>
+                )
+                })} 
+            </ScrollView>
+            
         </View>
     )
 }
@@ -55,7 +87,14 @@ const styles = StyleSheet.create({
     header: {
       fontSize: 30,
       textAlign: 'center',
-      marginTop: 100,
+      marginTop: 50,
+      fontWeight: 'bold'
+    },
+    data_header: {
+      fontSize: 30,
+      textAlign: 'center',
+      marginTop: 20,
+      marginBottom: 10,
       fontWeight: 'bold'
     },
     input: {
@@ -65,5 +104,21 @@ const styles = StyleSheet.create({
       padding:10,
       fontSize:18,
       borderRadius:6
+    },
+    text: {
+      fontSize:20,
+      textAlign:'center',
+      marginTop:10,
+      marginBottom:10,
+      marginLeft: '20',
+      textAlign: 'left',
+    },
+    database_data: {
+      borderWidth: 1,
+      borderColor:'black',
+      borderRadius:6,
+      fontSize:20,
+      textAlign:'center',
+      marginBottom:10
     },
   });
